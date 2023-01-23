@@ -1,0 +1,62 @@
+[package]
+name = "geo_renderer"
+version = "0.1.0"
+authors = ["Fabian Lyck <fabian.lyck@gmail.com>"]
+edition = "2021"
+
+[[bin]]
+name = "geo_renderer"
+path = "src/main.rs"
+
+[[bin]]
+name = "render_frame"
+path = "src/render_frame.rs"
+
+[[bin]]
+name = "render_dataset"
+path = "src/render_dataset.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+image = "0.24"
+tiff = "0.7"
+shaderc = "0.8"
+wgpu = { version = "0.14", features = ["spirv"] }
+pollster = "0.2"
+futures-intrusive = "0.4"
+# Byte array casting
+bytemuck = { version = "1.4", features = [ "derive" ] }
+# Error handling
+anyhow = "1.0"
+# Linalg
+nalgebra = "0.31"
+# Multi dimensional arrays
+ndarray = { version = "0.15.3", features = ["serde", "rayon"] }
+# Logging
+log = "0.4"
+fern = { version = "0.6", features = ["colored"] }
+chrono = { version = "0.4", features = ["serde"] }
+# cmd line args
+clap = { version = "3.2", features = ["derive", "env", "wrap_help"] }
+# Non const statics
+lazy_static = "1.4.0"
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.5.9"
+serde_json = "1.0"
+# Iterator utilities
+itertools = "0.10"
+# Parallelization
+rayon = "1.5.3"
+# Csv parsing
+csv = "1.1"
+
+[profile.dev.package.image]
+opt-level = 3
+[profile.dev.package.png]
+opt-level = 3
+[profile.dev.package.deflate]
+opt-level = 3
+[profile.dev.package.tiff]
+opt-level = 3

@@ -1,0 +1,15 @@
+# xi = 1.76
+# focal_length_x_px = 1606
+# focal_length_y_px = 1606
+# optical_center_x_px = 1024
+# optical_center_y_px = 1024
+# image_width_px = 2048
+# image_height_px = 2048
+
+xi = 1.76
+focal_length_x_px = 803.175515
+focal_length_y_px = 803.396372
+optical_center_x_px = 520.794852
+optical_center_y_px = 524.968252
+image_width_px = 1024
+image_height_px = 1024
