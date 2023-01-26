@@ -5,7 +5,7 @@ use std::num::NonZeroU32;
 use anyhow::{bail, Context, Result};
 use image::{imageops::FilterType, ImageBuffer};
 use log::debug;
-use nalgebra::Point2;
+use nalgebra::{Point2, Vector3};
 use tiff::decoder::DecodingResult;
 use wgpu::util::DeviceExt;
 
@@ -72,6 +72,12 @@ impl GridCoords {
     }
     pub fn right(&self) -> Self {
         GridCoords(Point2::new(self.0.x + 1, self.0.y))
+    }
+    pub fn above(&self) -> Self {
+        GridCoords(Point2::new(self.0.x, self.0.y - 1))
+    }
+    pub fn left(&self) -> Self {
+        GridCoords(Point2::new(self.0.x - 1, self.0.y))
     }
 
     /// Distance of closest two corners, i.e. 0 if direct 8-neighbours
@@ -188,25 +194,54 @@ impl GridSquare {
     }
 
     /// Fill in the border of the elevation grid to match with neighboring cells
-    pub fn cleanup_borders(&mut self, bottom_neighbor: &GridSquare, right_neighbor: &GridSquare) {
+    pub fn cleanup_borders(
+        &mut self,
+        bottom_neighbor: Option<&GridSquare>,
+        right_neighbor: Option<&GridSquare>,
+        top_neighbor: Option<&GridSquare>,
+        left_neighbor: Option<&GridSquare>,
+    ) {
         let mesh_resolution = self.elevation.dim().0 - 1;
+        let origin: Coords = self.coords.into();
         // Fill bottom row
-        for x in 0..mesh_resolution + 1 {
-            self.elevation[[x, mesh_resolution]] = bottom_neighbor.elevation[[
-                (x as f32 * (bottom_neighbor.elevation.dim().0 - 1) as f32
-                    / (mesh_resolution) as f32)
-                    .round() as usize,
-                0,
-            ]];
+        if let Some(bottom_neighbor) = bottom_neighbor {
+            for x in 0..mesh_resolution + 1 {
+                let coords: Coords = origin
+                    + Vector3::new(
+                        x as f32 / mesh_resolution as f32 * IMAGE_SIZE_M,
+                        IMAGE_SIZE_M,
+                        0f32,
+                    );
+                self.elevation[[x, mesh_resolution]] = bottom_neighbor.sample_altitude(coords);
+            }
         }
         // Fill rightmost row
-        for y in 0..mesh_resolution + 1 {
-            self.elevation[[mesh_resolution, y]] = right_neighbor.elevation[[
-                0,
-                (y as f32 * (right_neighbor.elevation.dim().1 - 1) as f32
-                    / (mesh_resolution) as f32)
-                    .round() as usize,
-            ]];
+        if let Some(right_neighbor) = right_neighbor {
+            for y in 0..mesh_resolution + 1 {
+                let coords: Coords = origin
+                    + Vector3::new(
+                        IMAGE_SIZE_M,
+                        y as f32 / mesh_resolution as f32 * IMAGE_SIZE_M,
+                        0f32,
+                    );
+                self.elevation[[mesh_resolution, y]] = right_neighbor.sample_altitude(coords);
+            }
+        }
+        // Fill top row
+        if let Some(top_neighbor) = top_neighbor {
+            for x in 0..mesh_resolution + 1 {
+                let coords: Coords = origin
+                    + Vector3::new(x as f32 / mesh_resolution as f32 * IMAGE_SIZE_M, 0f32, 0f32);
+                self.elevation[[x, 0]] = top_neighbor.sample_altitude(coords);
+            }
+        }
+        // Fill leftmost row
+        if let Some(left_neighbor) = left_neighbor {
+            for y in 0..mesh_resolution + 1 {
+                let coords: Coords = origin
+                    + Vector3::new(0f32, y as f32 / mesh_resolution as f32 * IMAGE_SIZE_M, 0f32);
+                self.elevation[[0, y]] = left_neighbor.sample_altitude(coords);
+            }
         }
     }
 
@@ -222,6 +257,10 @@ impl GridSquare {
         let top = bottom + 1;
         let bottom_fac = top as f32 - idx.y;
         let top_fac = idx.y - bottom as f32;
+        let left = left.min(self.elevation.dim().0 - 1);
+        let right = right.min(self.elevation.dim().0 - 1);
+        let bottom = bottom.min(self.elevation.dim().0 - 1);
+        let top = top.min(self.elevation.dim().0 - 1);
         let left_val =
             self.elevation[[left, top]] * top_fac + self.elevation[[left, bottom]] * bottom_fac;
         let right_val =

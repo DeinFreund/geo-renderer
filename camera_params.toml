@@ -6,6 +6,14 @@
 # image_width_px = 2048
 # image_height_px = 2048
 
+# xi = 1.76
+# focal_length_x_px = 8030.175515
+# focal_length_y_px = 8030.396372
+# optical_center_x_px = 5200.794852
+# optical_center_y_px = 5240.968252
+# image_width_px = 10240
+# image_height_px = 10240
+
 xi = 1.76
 focal_length_x_px = 803.175515
 focal_length_y_px = 803.396372

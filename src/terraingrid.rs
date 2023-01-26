@@ -45,7 +45,7 @@ impl TerrainGrid {
                     .unproject(Point2::new(pt1_px.x + 1.0, pt1_px.y), agl_m)
                     .unwrap();
                 let resolution_m = 0.5 * (distance(&pt1_m, &pt2_m) + distance(&pt1_m, &pt3_m));
-                match GridSquare::new(*coords, 20f32 * resolution_m, storage_config.clone()) {
+                match GridSquare::new(*coords, 1f32 * resolution_m, storage_config.clone()) {
                     Ok(square) => Some((*coords, square)),
                     Err(e) => {
                         warn!("Unable to load square at {:?}: {}", &coords, e);
@@ -57,11 +57,22 @@ impl TerrainGrid {
 
         for coords in &circle {
             let mut tile = tiles.remove(coords).unwrap();
-            if let (Some(bottom), Some(right)) =
-                (tiles.get(&coords.below()), tiles.get(&coords.right()))
-            {
-                tile.cleanup_borders(bottom, right);
-            }
+            tile.cleanup_borders(
+                tiles.get(&coords.below()),
+                tiles.get(&coords.right()),
+                None,
+                None,
+            );
+            tiles.insert(*coords, tile);
+        }
+        for coords in &circle {
+            let mut tile = tiles.remove(coords).unwrap();
+            tile.cleanup_borders(
+                None,
+                None,
+                tiles.get(&coords.above()),
+                tiles.get(&coords.left()),
+            );
             tiles.insert(*coords, tile);
         }
         Self {
