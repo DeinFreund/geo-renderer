@@ -122,7 +122,7 @@ async fn render_chunk(
 
     let camera_pos: Coords = chunk_coords.into();
     let mut camera_positions: Vec<Coords> = Vec::new();
-    for agl_m in [/*100,  200, */ 300, 550, 800, 1200, 2000] {
+    for agl_m in [300, 550, 800, 1200, 2000, 2800] {
         let resolution = 1500 / agl_m + 1;
         let step_m = 1000.0 / resolution as f32;
         let offset_m = step_m / 2.0;
@@ -154,7 +154,7 @@ async fn render_chunk(
     let images = rendered_requests
         .into_par_iter()
         .map(|request| {
-            let filename = output_dir.join(&format!("image_{}", request.request_id));
+            let filename = output_dir.join(format!("image_{}", request.request_id));
             let rgb_image_path = filename.with_extension("png");
             let depth_image_path = filename.with_extension("bin");
 

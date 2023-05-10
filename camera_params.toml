@@ -14,10 +14,11 @@
 # image_width_px = 10240
 # image_height_px = 10240
 
+# Don't use off-center optical center without checking x,y origin!
 xi = 1.76
-focal_length_x_px = 803.175515
-focal_length_y_px = 803.396372
-optical_center_x_px = 520.794852
-optical_center_y_px = 524.968252
+focal_length_x_px = 803 #803.175515
+focal_length_y_px = 803 #.396372
+optical_center_x_px = 512.0 #520.794852
+optical_center_y_px = 512.0 #524.968252
 image_width_px = 1024
 image_height_px = 1024

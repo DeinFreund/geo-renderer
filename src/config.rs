@@ -14,6 +14,9 @@ pub struct StorageConfig {
     /// Path to a directory containing swissimage 10cm jpegs
     #[clap(long, default_value = "/media/fl/DDLN-FL21/swisstopo/image/conv/")]
     pub image_dir: PathBuf,
+    /// Maximum allowed image LOD to load, 0 means allowing the full resolution
+    #[clap(long, default_value = "0")]
+    pub image_max_lod: usize,
 }
 
 impl StorageConfig {

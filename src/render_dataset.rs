@@ -158,7 +158,7 @@ async fn run(mut args: Flags) -> Result<()> {
                 .map(|request| {
                     let filename = args
                         .output_dir
-                        .join(&format!("image_{}", request.request_id));
+                        .join(format!("image_{}", request.request_id));
                     let rgb_image_path = filename.with_extension("png");
                     let depth_image_path = filename.with_extension("bin");
 

@@ -333,9 +333,13 @@ impl GridSquare {
         queue: &wgpu::Queue,
         texture_bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<Model> {
-        let resolution = self.resolution.min(ORTHOIMAGE_RESOLUTION_PX);
+        let resolution = self
+            .resolution
+            .min(ORTHOIMAGE_RESOLUTION_PX / (1 << self.storage_config.image_max_lod));
 
-        let lod = calc_lod(ORTHOIMAGE_RESOLUTION_PX, resolution as u32).min(ORTHOIMAGE_MAX_LOD);
+        let lod = calc_lod(ORTHOIMAGE_RESOLUTION_PX, resolution)
+            .max(self.storage_config.image_max_lod)
+            .min(ORTHOIMAGE_MAX_LOD);
         let path = self.storage_config.image_dir.join(format!(
             "{}-{}_lod{}.jpg",
             self.coords.0.x, self.coords.0.y, lod
@@ -351,6 +355,15 @@ impl GridSquare {
                 + 1,
         )
         .unwrap();
+        if img.width() > ORTHOIMAGE_RESOLUTION_PX / (1 << self.storage_config.image_max_lod) {
+            let width = img.width();
+            img = img.resize(
+                ORTHOIMAGE_RESOLUTION_PX / (1 << self.storage_config.image_max_lod),
+                ORTHOIMAGE_RESOLUTION_PX / (1 << self.storage_config.image_max_lod),
+                FilterType::Lanczos3,
+            );
+            img = img.resize(width, width, FilterType::Lanczos3);
+        }
         if max_lod == 1.try_into().unwrap() && resolution < ORTHOIMAGE_RESOLUTION_PX {
             // If there's only one LOD, downscale the image to the required resolution
             img = img.resize(resolution, resolution, FilterType::Lanczos3);

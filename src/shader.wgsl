@@ -33,12 +33,13 @@ fn vs_main(
     let norm : f32 = -localPos[2] + camera.xi * dist;
     out.clip_position[0] = camera.fx * localPos[0] + camera.cx * norm;
     out.clip_position[1] = camera.fy * localPos[1] + camera.cy * norm;
-    out.clip_position[2] = -localPos[2]*norm *0.0001;//(-localPos[2] * camera.xi + dist)*norm*0.0001;
+    out.clip_position[2] = dist*norm *0.0001; // Simple distance, for the proper culling use (-localPos[2] * camera.xi + dist)*norm*0.0001
     out.clip_position[3] = norm;
 
     out.tex_coords = model.tex_coords;
     return out;
 }
+
 
 // Fragment shader
 
@@ -51,7 +52,5 @@ var s_diffuse: sampler;
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let object_color: vec4<f32> = textureSample(t_diffuse, s_diffuse, in.tex_coords);
 
-    //return object_color;
-    
-    return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+    return object_color;
 }

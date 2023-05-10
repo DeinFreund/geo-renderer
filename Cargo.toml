@@ -56,7 +56,5 @@ csv = "1.1"
 opt-level = 3
 [profile.dev.package.png]
 opt-level = 3
-[profile.dev.package.deflate]
-opt-level = 3
 [profile.dev.package.tiff]
 opt-level = 3

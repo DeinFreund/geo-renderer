@@ -19,6 +19,9 @@ pub enum RequestPose {
     PositionAgl {
         camera_pos_agl: Coords,
     },
+    PositionAsl {
+        camera_pos_asl: Coords,
+    },
     FacingAsl {
         camera_pos_asl: Coords,
         camera_fwd: Vector3<f32>,
@@ -30,6 +33,7 @@ impl From<RequestPose> for GridCoords {
     fn from(pose: RequestPose) -> Self {
         match pose {
             RequestPose::PositionAgl { camera_pos_agl } => camera_pos_agl,
+            RequestPose::PositionAsl { camera_pos_asl } => camera_pos_asl,
             RequestPose::FacingAsl { camera_pos_asl, .. } => camera_pos_asl,
         }
         .into()
@@ -60,6 +64,17 @@ impl RenderRequest {
                     camera_pos_agl.y,
                     camera_pos_agl.z + grid_square.sample_altitude(camera_pos_agl),
                 ),
+                camera_fwd: Vector3::new(0.0, 0.0, -1.0),
+                camera_up: Vector3::new(0.0, -1.0, 0.0),
+                request_id: self.request_id,
+            },
+            RequestPose::PositionAsl { camera_pos_asl } => NormalizedRenderRequest {
+                camera_pos_agl: Coords::new(
+                    camera_pos_asl.x,
+                    camera_pos_asl.y,
+                    camera_pos_asl.z - grid_square.sample_altitude(camera_pos_asl),
+                ),
+                camera_pos_asl,
                 camera_fwd: Vector3::new(0.0, 0.0, -1.0),
                 camera_up: Vector3::new(0.0, -1.0, 0.0),
                 request_id: self.request_id,
@@ -321,7 +336,7 @@ impl Renderer {
                 strip_index_format: None,
                 front_face: wgpu::FrontFace::Ccw,
                 cull_mode: Some(wgpu::Face::Back),
-                polygon_mode: wgpu::PolygonMode::Fill, //Line
+                polygon_mode: wgpu::PolygonMode::Fill, // Set this to Line for mesh rendering
                 unclipped_depth: false,
                 conservative: false,
             },
